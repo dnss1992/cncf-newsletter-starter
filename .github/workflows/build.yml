@@ -17,7 +17,7 @@ jobs:
           source .venv/bin/activate
           pip install -r requirements.txt
           python tools/sync_projects.py
-          python sync_projects.py --since '3 days' --out ./build --no-web
+          python ./sync_projects.py --since '3 days' --out ./build --no-web
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
