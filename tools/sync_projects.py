@@ -61,7 +61,7 @@ def collect_graduated_projects(data: dict) -> list[dict]:
     for cat in data.get("landscape", []):
         for sub in cat.get("subcategories", []):
             for item in sub.get("items", []):
-                maturity = str(item.get("maturity", "")).lower()
+                maturity = str(item.get("project", "")).lower()
                 if maturity != "graduated":
                     continue
                 repo_url = item.get("repo_url") or ""
