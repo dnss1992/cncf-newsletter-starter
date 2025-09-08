@@ -62,7 +62,7 @@ jobs:
           # Make latest available at / (root)
           cp build/issue.html site/index.html
           cp build/items.json site/items.json
-          cp build/about.html  "site/${DATE}/about.html"
+          cp build/about.html  "site/about.html"
 
           # Optional: simple index page listing archives
           {
