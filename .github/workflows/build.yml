@@ -50,6 +50,7 @@ jobs:
           set -euo pipefail
           DATE="$(date -u +%F)"
           mkdir -p site/.well-known
+          echo "cncfnews.org" > site/CNAME
           touch site/.nojekyll
 
           # Archive current issue under dated path
