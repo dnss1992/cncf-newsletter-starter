@@ -1,17 +1,54 @@
 from __future__ import annotations
-import os, sys, yaml, requests, re
+import os, sys, yaml, requests
+from urllib.parse import urlparse, urljoin
 
 LANDSCAPE_RAW = "https://raw.githubusercontent.com/cncf/landscape/master/landscape.yml"
 OUT_PATH = "config/projects.yaml"
 
-def guess_repo_slug(repo_url: str) -> str | None:
-    m = re.match(r"https?://github\.com/([^/]+)(?:/([^/#]+))?", repo_url.strip())
-    if not m:
+def resolve_repo_slug(repo_url: str) -> str | None:
+    try:
+        u = urlparse(repo_url.strip())
+    except Exception:
         return None
-    owner = m.group(1)
-    repo = m.group(2) or None
-    if repo:
-        return f"{owner}/{repo}"
+    if u.scheme not in ("http", "https"):
+        return None
+    if u.netloc.lower() != "github.com":
+        return None
+    parts = [p for p in u.path.strip("/").split("/") if p]
+    if len(parts) < 2:
+        return None
+    owner, repo = parts[0], parts[1]
+    if repo.endswith(".git"):
+        repo = repo[:-4]
+    slug = f"{owner}/{repo}"
+    try:
+        r = requests.head(f"https://github.com/{slug}", timeout=10)
+        if r.status_code >= 400:
+            return None
+    except requests.RequestException:
+        return None
+    return slug
+
+def discover_feed(homepage: str) -> str | None:
+    if not homepage:
+        return None
+    candidates = [
+        "/feed.xml",
+        "/rss.xml",
+        "/index.xml",
+        "/atom.xml",
+        "/blog/index.xml",
+        "/blog/rss.xml",
+    ]
+    base = homepage.rstrip("/") + "/"
+    for cand in candidates:
+        url = urljoin(base, cand.lstrip("/"))
+        try:
+            r = requests.head(url, timeout=10, allow_redirects=True)
+            if r.status_code < 400:
+                return url
+        except requests.RequestException:
+            continue
     return None
 
 def fetch_landscape() -> dict:
@@ -28,19 +65,10 @@ def collect_graduated_projects(data: dict) -> list[dict]:
                 if maturity != "graduated":
                     continue
                 repo_url = item.get("repo_url") or ""
-                slug = guess_repo_slug(repo_url) if repo_url else None
+                slug = resolve_repo_slug(repo_url)
                 name = item.get("name") or item.get("project") or ""
                 homepage = item.get("homepage_url") or ""
-                rss = None
-                for cand in ("/feed.xml", "/rss.xml", "/index.xml", "/atom.xml", "/blog/index.xml", "/blog/rss.xml"):
-                    if homepage and homepage.endswith("/"):
-                        rss = homepage[:-1] + cand
-                    elif homepage:
-                        rss = homepage + cand
-                    else:
-                        rss = None
-                    if rss:
-                        break
+                rss = discover_feed(homepage)
                 if not slug:
                     continue
                 out.append({
