@@ -1,4 +1,4 @@
-# assemble/build_issue.py
+# assemble/build_issue.py (replace your current build() function with this version or merge the about bits)
 from __future__ import annotations
 import os, json, datetime as dt, pathlib
 from typing import List, Dict, Any
@@ -11,7 +11,7 @@ def build(issue_items: List[Dict[str, Any]], out_dir: str) -> Dict[str, str]:
         autoescape=select_autoescape()
     )
 
-    # --- Minimal MD for people who like editing text (kept optional) ---
+    # ---- Existing MD (optional) ----
     md_tpl = env.get_template("issue.md.j2")
     releases = [i for i in issue_items if i.get("type") == "release"]
     blogs    = [i for i in issue_items if i.get("type") == "blog"]
@@ -25,12 +25,10 @@ def build(issue_items: List[Dict[str, Any]], out_dir: str) -> Dict[str, str]:
     )
     html_from_md = MarkdownIt().render(md)
 
-    # --- Primary compact HTML (Bootstrap + filters) ---
-    # Gather filter facets
+    # ---- Primary HTML (Bootstrap + filters) ----
     projects = sorted({ i["project"] for i in issue_items if i.get("project") })
     types    = sorted({ i["type"]    for i in issue_items if i.get("type") })
 
-    # Ensure output dir exists and write items.json for client-side filtering
     pathlib.Path(out_dir).mkdir(parents=True, exist_ok=True)
     with open(os.path.join(out_dir, "items.json"), "w", encoding="utf-8") as f:
         json.dump(issue_items, f, indent=2, ensure_ascii=False)
@@ -42,11 +40,13 @@ def build(issue_items: List[Dict[str, Any]], out_dir: str) -> Dict[str, str]:
         types=types
     )
 
-    # Write files
-    with open(os.path.join(out_dir, "issue.md"), "w", encoding="utf-8") as f:
-        f.write(md)
-    with open(os.path.join(out_dir, "issue.html"), "w", encoding="utf-8") as f:
-        f.write(html)
+    with open(os.path.join(out_dir, "issue.md"), "w", encoding="utf-8") as f: f.write(md)
+    with open(os.path.join(out_dir, "issue.html"), "w", encoding="utf-8") as f: f.write(html)
 
-    # Still return the MD-converted HTML (not used by the Bootstrap page, but handy)
+    # ---- NEW: build a standalone About page ----
+    about_tpl = env.get_template("about.html.j2")
+    about_html = about_tpl.render(date_str=dt.datetime.utcnow().strftime("%Y"))
+    with open(os.path.join(out_dir, "about.html"), "w", encoding="utf-8") as f:
+        f.write(about_html)
+
     return {"md": md, "html": html_from_md}

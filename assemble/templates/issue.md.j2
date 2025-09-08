@@ -20,7 +20,9 @@
 <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
   <div class="container">
     <a class="navbar-brand" href="#">CNCF Updates</a>
-    <span class="navbar-text">Issue date: {{ date_str }}</span>
+    <div class="navbar-nav ms-auto">
+      <a class="nav-link" href="about.html">About</a>
+    </div>
   </div>
 </nav>
 
@@ -56,7 +58,26 @@
       <div id="count" class="ms-auto text-muted small">0 items</div>
     </div>
   </div>
-
+  <!-- About (collapsible card) -->
+  <div class="mt-3">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between">
+          <h2 class="h6 mb-0">About CNCF News</h2>
+          <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#aboutCard" aria-expanded="false">
+            Show/Hide
+          </button>
+        </div>
+        <div id="aboutCard" class="collapse mt-3">
+          <p><strong>CNCF News</strong> curates releases, blogs, and advisories from all CNCF Graduated projects, built from official GitHub releases and RSS feeds.</p>
+          <ul class="mb-2">
+            <li>🚀 New releases</li>
+            <li>📝 Community posts & RFCs</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- Results -->
   <div id="items" class="mt-3 row row-cols-1 gy-3">
     <!-- Cards injected by JS -->
