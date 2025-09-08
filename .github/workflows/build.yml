@@ -57,6 +57,7 @@ jobs:
           mkdir -p "site/${DATE}"
           cp build/issue.html "site/${DATE}/index.html"
           cp build/items.json "site/${DATE}/items.json"
+          cp build/about.html  "site/${DATE}/about.html"
 
           # Make latest available at / (root)
           cp build/issue.html site/index.html
