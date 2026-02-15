@@ -1,4 +1,4 @@
-# CNCF Updates Newsletter — Starter Kit
+# CNCF Updates Newsletter — Starters Kit
 
 
 ## Auto-sync CNCF Graduated Projects
